@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitPro — Sistema Completo de Gestão</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="acad.css">
+</head>
+<body>
+<div id="app">
+<!-- ============ LOGIN ============ -->
+<div id="login-screen" class="active">
+<div class="login-wrapper">
+<div class="login-logo">
+<div class="ic">💪</div>
+<div class="txt">FitPro Manager</div>
+</div>
+<div class="login-box">
+<div id="login-form">
+<h2>Bem-vindo de volta!</h2>
+<p class="sub">Entre na sua conta para continuar</p>
+<div class="input-group">
+<label>Email ou usuário</label>
+<input type="text" id="login-email" placeholder="admin@gym.com">
+</div>
+<div class="input-group">
+<label>Senha</label>
+<input type="password" id="login-password" placeholder="••••••••">
+</div>
+<button class="btn btn-primary btn-block" onclick="handleLogin()">Entrar</button>
+<button class="btn btn-secondary btn-block mt-3" onclick="showRegister()">Criar nova conta</button>
+</div>
+<div id="register-form" style="display:none;">
+<h2>Criar conta</h2>
+<p class="sub">Comece sua jornada fitness hoje</p>
+<div class="input-group">
+<label>Nome</label>
+<input type="text" id="reg-name" placeholder="Seu nome">
+</div>
+<div class="input-group">
+<label>Email</label>
+<input type="email" id="reg-email" placeholder="seu@email.com">
+</div>
+<div class="input-group">
+<label>Senha</label>
+<input type="password" id="reg-password" placeholder="Mínimo 4 caracteres">
+</div>
+<button class="btn btn-primary btn-block" onclick="handleRegister()">Cadastrar</button>
+<button class="btn btn-secondary btn-block mt-3" onclick="showLogin()">Já tenho conta</button>
+</div>
+</div>
+</div>
+</div>
+<!-- ============ SIDEBAR (DESKTOP) ============ -->
+<aside class="sidebar" id="sidebar" style="display:none;">
+<div class="sidebar-logo">
+<div class="ic">💪</div>
+<div class="txt">FitPro</div>
+</div>
+<nav class="sidebar-nav">
+<div class="nav-link active" data-screen="home" onclick="navigate('home')"><span class="ic">🏠</span> Dashboard</div>
+<div class="nav-link" data-screen="workouts" onclick="navigate('workouts')"><span class="ic">💪</span> Meus Treinos</div>
+<div class="nav-link" data-screen="diet" onclick="navigate('diet')"><span class="ic">🍎</span> Dieta</div>
+<div class="nav-link" data-screen="progress" onclick="navigate('progress')"><span class="ic">📊</span> Progresso</div>
+<div class="nav-link" data-screen="tools" onclick="navigate('tools')"><span class="ic">🧰</span> Ferramentas</div>
+<div class="nav-link" data-screen="nutrition" onclick="navigate('nutrition')"><span class="ic">🥗</span> Nutrição</div>
+<div style="height:1px; background:var(--border); margin:8px 0;"></div>
+<div class="nav-link" data-screen="students" onclick="navigate('students')"><span class="ic">👥</span> Alunos & Planos</div>
+<div class="nav-link" data-screen="financial" onclick="navigate('financial')"><span class="ic">💰</span> Financeiro</div>
+<div class="nav-link" data-screen="schedule" onclick="navigate('schedule')"><span class="ic">📅</span> Grade & Aulas</div>
+<div class="nav-link" data-screen="access" onclick="navigate('access')"><span class="ic">🚪</span> Logs de Acesso</div>
+<div class="nav-link" data-screen="assessments" onclick="navigate('assessments')"><span class="ic">📋</span> Avaliações</div>
+</nav>
+<div class="sidebar-footer">
+<div class="user-card" onclick="navigate('profile')">
+<div class="avatar" id="sb-avatar">A</div>
+<div class="info">
+<div class="name" id="sb-name">Administrador</div>
+<div class="level" id="sb-level">Gerente</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- ============ MAIN ============ -->
+<main class="main" id="main" style="display:none;">
+<div class="top-bar">
+<div>
+<div class="sub" id="top-sub">Bem-vindo de volta 👋</div>
+<h1 id="top-title">Dashboard</h1>
+</div>
+<div class="top-actions">
+<div class="icon-btn" onclick="openAI()" title="IA">🧠</div>
+<div class="icon-btn" onclick="showNotifications()" title="Notificações">🔔<span class="notif-dot" id="notif-dot" style="display:none;"></span></div>
+<div class="icon-btn" onclick="toggleTheme()" title="Tema">🌓</div>
+</div>
+</div>
+<div class="content">
+<!-- HOME / DASHBOARD -->
+<div id="home-screen" class="screen active">
+<div class="streak-banner">
+<div class="streak-fire">🔥</div>
+<div class="streak-info">
+<div class="num"><span id="streak-count">0</span> dias</div>
+<div class="lbl">Sequência atual — continue assim!</div>
+</div>
+</div>
+<div class="grid-stats">
+<div class="stat-card g1"><div class="icon">️</div><div class="label">Treinos no mês</div><div class="value" id="stat-workouts">0</div><div class="trend up">↑ Mantenha o ritmo</div></div>
+<div class="stat-card g2"><div class="icon">⚡</div><div class="label">XP Total</div><div class="value" id="stat-xp">0</div><div class="trend" id="stat-level">Nível 1</div></div>
+<div class="stat-card g3"><div class="icon">⏱️</div><div class="label">Minutos totais</div><div class="value" id="stat-mins">0</div><div class="trend">este mês</div></div>
+<div class="stat-card g4"><div class="icon">🎯</div><div class="label">Meta calórica</div><div class="value" id="stat-goal">0%</div><div class="trend">hoje</div></div>
+</div>
+<div class="dashboard-grid">
+<div>
+<div class="section-title" style="margin-top:0;"><h3>📈 Evolução de Peso</h3><a onclick="navigate('progress')">Ver histórico →</a></div>
+<div class="chart-container"><canvas id="progressChart"></canvas></div>
+</div>
+<div>
+<div class="section-title" style="margin-top:0;"><h3>💧 Hidratação</h3><a onclick="navigate('tools')">Mais →</a></div>
+<div class="card">
+<div class="flex-between">
+<div>
+<div class="text-sm text-muted">Hoje</div>
+<div style="font-size:24px; font-weight:800;"><span id="home-water-count">0</span> / 8 copos</div>
+</div>
+<div style="font-size:40px;">💧</div>
+</div>
+<div class="progress-bar mt-3"><div class="fill" id="home-water-bar" style="width:0%;"></div></div>
+</div>
+<div class="section-title"><h3>🏆 Recordes</h3></div>
+<div id="home-prs"></div>
+</div>
+</div>
+<div class="section-title"><h3> Treino de hoje</h3><a onclick="navigate('workouts')">Ver todos →</a></div>
+<div id="today-workout"></div>
+<div class="section-title"><h3>🏅 Conquistas recentes</h3><a onclick="navigate('profile')">Todas →</a></div>
+<div id="achievements-preview"></div>
+</div>
+<!-- WORKOUTS -->
+<div id="workouts-screen" class="screen">
+<div class="day-tabs" id="day-tabs"></div>
+<div class="workout-mode-switch">
+<button class="workout-mode-btn active" data-mode="plan" onclick="switchWorkoutMode('plan', this)">📝 Planejamento</button>
+<button class="workout-mode-btn" data-mode="exec" onclick="switchWorkoutMode('exec', this)">▶️ Execução</button>
+<button class="workout-mode-btn" data-mode="hist" onclick="switchWorkoutMode('hist', this)">📊 Histórico</button>
+</div>
+<div id="workout-plan-mode">
+<div class="workout-toolbar">
+<button class="btn btn-primary" onclick="openExerciseModal()">+ Exercício</button>
+<button class="btn btn-secondary" onclick="openLibraryPicker()">📚 Biblioteca</button>
+<button class="btn btn-secondary" onclick="openDayMenu()">⋯ Mais</button>
+</div>
+<div id="exercises-list"></div>
+<div class="section-title"><h3>📝 Anotações</h3><button class="link" onclick="openAINote()">+ Nova</button></div>
+<div id="day-notes"></div>
+</div>
+<div id="workout-exec-mode" style="display:none;"><div id="exec-content"></div></div>
+<div id="workout-hist-mode" style="display:none;"><div id="history-content"></div></div>
+</div>
+<!-- DIET -->
+<div id="diet-screen" class="screen">
+<div class="cal-hero" id="cal-hero">
+<div class="cal-ring" id="cal-ring"><div class="inner"><div class="val" id="cal-pct">0%</div><div class="lbl">consumido</div></div></div>
+<div class="info">
+<h2>Calorias de hoje</h2>
+<p><span id="cal-consumed">0</span> de <span id="cal-goal">2000</span> kcal</p>
+<button class="btn btn-ghost" style="background:rgba(0,0,0,0.15); color:#000;" onclick="openMealModal()">+ Adicionar refeição</button>
+</div>
+</div>
+<div class="section-title" style="margin-top:0;"><h3>Macronutrientes</h3></div>
+<div class="grid-3" style="margin-bottom:16px;">
+<div class="macro-card"><div class="macro-ring protein" id="ring-prot" style="--pct:0%;"><span id="pct-prot">0%</span></div><div class="label">Proteína</div><div class="value"><span id="macro-prot">0</span>g / <span id="goal-prot">120</span>g</div></div>
+<div class="macro-card"><div class="macro-ring carb" id="ring-carb" style="--pct:0%;"><span id="pct-carb">0%</span></div><div class="label">Carboidrato</div><div class="value"><span id="macro-carb">0</span>g / <span id="goal-carb">250</span>g</div></div>
+<div class="macro-card"><div class="macro-ring fat" id="ring-fat" style="--pct:0%;"><span id="pct-fat">0%</span></div><div class="label">Gordura</div><div class="value"><span id="macro-fat">0</span>g / <span id="goal-fat">70</span>g</div></div>
+</div>
+<div class="section-title"><h3>Refeições do dia</h3></div>
+<div id="meals-list"></div>
+</div>
+<!-- PROGRESS -->
+<div id="progress-screen" class="screen">
+<div class="tab-switch">
+<button class="tab-btn active" onclick="switchProgressTab(this,'calendar')">📅 Calendário</button>
+<button class="tab-btn" onclick="switchProgressTab(this,'weight')">⚖️ Peso</button>
+<button class="tab-btn" onclick="switchProgressTab(this,'records')">🏆 Recordes</button>
+</div>
+<div id="progress-calendar">
+<div class="card">
+<div class="flex-between">
+<h3 id="cal-month-title">Junho 2026</h3>
+<div style="display:flex; gap:6px;">
+<button class="btn btn-sm btn-secondary" onclick="changeMonth(-1)">‹</button>
+<button class="btn btn-sm btn-secondary" onclick="changeMonth(1)">›</button>
+</div>
+</div>
+<div class="heatmap-header"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div>
+<div class="heatmap" id="heatmap"></div>
+<div class="mt-4" style="display:flex; gap:16px; font-size:12px; color:var(--text-2);">
+<div>📅 Treinos: <strong id="cal-month-count" style="color:var(--primary);">0</strong></div>
+<div>🔥 Dias ativos: <strong id="cal-month-days" style="color:var(--accent);">0</strong></div>
+</div>
+</div>
+</div>
+<div id="progress-weight" style="display:none;">
+<div class="card" style="height:320px; margin-bottom:16px;"><canvas id="weightChart"></canvas></div>
+<div class="card">
+<h3 style="margin-bottom:12px;">Adicionar peso</h3>
+<div class="row">
+<div class="input-group" style="margin:0;"><label>Peso (kg)</label><input type="number" id="new-weight" step="0.1" placeholder="Ex: 75.5"></div>
+<div style="display:flex; align-items:flex-end;"><button class="btn btn-primary" onclick="addWeight()">Salvar</button></div>
+</div>
+<div class="mt-4 text-sm text-muted"><div>Peso atual: <strong id="current-weight">--</strong> kg</div><div>Variação: <strong id="weight-diff">--</strong></div></div>
+</div>
+</div>
+<div id="progress-records" style="display:none;"><div id="pr-list"></div></div>
+</div>
+<!-- TOOLS -->
+<div id="tools-screen" class="screen">
+<div class="tab-switch">
+<button class="tab-btn active" onclick="switchToolsTab(this,'water')">💧 Água</button>
+<button class="tab-btn" onclick="switchToolsTab(this,'1rm')">🏋️ 1RM</button>
+<button class="tab-btn" onclick="switchToolsTab(this,'tdee')">🔥 TDEE</button>
+<button class="tab-btn" onclick="switchToolsTab(this,'imc')">️ IMC</button>
+<button class="tab-btn" onclick="switchToolsTab(this,'rest')">⏱️ Descanso</button>
+</div>
+<div id="tools-water">
+<div class="card">
+<div class="flex-between"><div><div class="text-sm text-muted">Hidratação de hoje</div><div style="font-size:28px; font-weight:800;"><span id="water-count">0</span> / 8 copos</div><div class="text-xs text-muted">≈ <span id="water-ml">0</span> ml de água</div></div><div style="font-size:54px;">💧</div></div>
+<div class="progress-bar mt-4"><div class="fill" id="water-bar" style="width:0%;"></div></div>
+<div class="water-grid mt-4" id="water-grid"></div>
+<div class="mt-4 text-sm text-muted">💡 Meta recomendada: 2L por dia (8 copos de 250ml)</div>
+</div>
+</div>
+<div id="tools-1rm" style="display:none;">
+<div class="card">
+<h3 style="margin-bottom:4px;">Calculadora de 1RM</h3>
+<p class="text-sm text-muted" style="margin-bottom:16px;">Estime sua carga máxima</p>
+<div class="row">
+<div class="input-group" style="margin:0;"><label>Peso (kg)</label><input type="number" id="rm-weight" step="0.5" value="60"></div>
+<div class="input-group" style="margin:0;"><label>Reps</label><input type="number" id="rm-reps" value="8" min="1" max="30"></div>
+</div>
+<button class="btn btn-primary btn-block mt-3" onclick="calculate1RM()">Calcular</button>
+<div id="rm-result"></div>
+</div>
+<div class="card mt-4"><h3 style="margin-bottom:12px;">Zonas de treinamento</h3><div id="rm-zones"></div></div>
+</div>
+<div id="tools-tdee" style="display:none;">
+<div class="card">
+<h3 style="margin-bottom:4px;">Calculadora TMB / TDEE</h3>
+<p class="text-sm text-muted" style="margin-bottom:16px;">Descubra suas calorias diárias</p>
+<div class="row">
+<div class="input-group" style="margin:0;"><label>Sexo</label><select id="tdee-sex"><option value="m">Masculino</option><option value="f">Feminino</option></select></div>
+<div class="input-group" style="margin:0;"><label>Idade</label><input type="number" id="tdee-age" value="25"></div>
+</div>
+<div class="row mt-3">
+<div class="input-group" style="margin:0;"><label>Peso (kg)</label><input type="number" id="tdee-weight" value="75" step="0.1"></div>
+<div class="input-group" style="margin:0;"><label>Altura (cm)</label><input type="number" id="tdee-height" value="175"></div>
+</div>
+<div class="input-group mt-3"><label>Nível de atividade</label>
+<select id="tdee-activity">
+<option value="1.2">Sedentário (pouco exercício)</option>
+<option value="1.375">Leve (1-3x/semana)</option>
+<option value="1.55" selected>Moderado (3-5x/semana)</option>
+<option value="1.725">Intenso (6-7x/semana)</option>
+<option value="1.9">Muito intenso (atleta)</option>
+</select>
+</div>
+<button class="btn btn-primary btn-block mt-3" onclick="calculateTDEE()">Calcular</button>
+<div id="tdee-result"></div>
+</div>
+</div>
+<div id="tools-imc" style="display:none;">
+<div class="card">
+<h3 style="margin-bottom:4px;">Calculadora de IMC</h3>
+<p class="text-sm text-muted" style="margin-bottom:16px;">Índice de Massa Corporal</p>
+<div class="row">
+<div class="input-group" style="margin:0;"><label>Peso (kg)</label><input type="number" id="imc-weight" step="0.1" placeholder="Ex: 75"></div>
+<div class="input-group" style="margin:0;"><label>Altura (cm)</label><input type="number" id="imc-height" placeholder="Ex: 175"></div>
+</div>
+<button class="btn btn-primary btn-block mt-3" onclick="calculateIMC()">Calcular IMC</button>
+<div id="imc-result"></div>
+</div>
+</div>
+<div id="tools-rest" style="display:none;">
+<div class="card" style="text-align:center;">
+<h3 style="margin-bottom:4px;">Timer de Descanso</h3>
+<p class="text-sm text-muted" style="margin-bottom:20px;">Timer rápido</p>
+<div class="timer-circle" id="quick-timer-circle" style="margin:0 auto;"><div class="inner"><div class="timer-display" id="quick-timer-display">01:00</div><div class="text-xs text-muted">segundos</div></div></div>
+<div class="grid-4 mt-4">
+<button class="btn btn-secondary" onclick="setQuickTimer(30)">30s</button>
+<button class="btn btn-secondary" onclick="setQuickTimer(60)">1min</button>
+<button class="btn btn-secondary" onclick="setQuickTimer(90)">1:30</button>
+<button class="btn btn-secondary" onclick="setQuickTimer(120)">2min</button>
+</div>
+<div class="row mt-3">
+<button class="btn btn-primary" id="qt-start" onclick="toggleQuickTimer()">▶️ Iniciar</button>
+<button class="btn btn-secondary" onclick="resetQuickTimer()">↺ Reset</button>
+</div>
+</div>
+</div>
+</div>
+<!-- NUTRIÇÃO INTELIGENTE -->
+<div id="nutrition-screen" class="screen">
+<div class="section-title" style="margin-top:0;"><h3>🥗 Nutrição Inteligente</h3></div>
+<div id="nutrition-form-container" class="card">
+<h4 style="margin-bottom:16px;">Configure sua Dieta Personalizada</h4>
+<div class="input-group">
+<label>Qual é o seu objetivo principal?</label>
+<select id="nutri-goal">
+<option value="emagrecimento">Emagrecimento (Déficit Calórico)</option>
+<option value="hipertrofia">Ganho de Massa Muscular (Superávit)</option>
+<option value="manutencao">Manutenção de Peso e Saúde</option>
+<option value="performance">Performance Esportiva</option>
+</select>
+</div>
+<div class="input-group">
+<label>Restrições Alimentares ou Condições de Saúde:</label>
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
+<label style="display:flex; align-items:center; gap:8px; font-size:13px; text-transform:none; cursor:pointer;">
+<input type="checkbox" id="rest-lactose" style="width:auto;"> Intolerância à Lactose
+</label>
+<label style="display:flex; align-items:center; gap:8px; font-size:13px; text-transform:none; cursor:pointer;">
+<input type="checkbox" id="rest-gluten" style="width:auto;"> Doença Celíaca (Sem Glúten)
+</label>
+<label style="display:flex; align-items:center; gap:8px; font-size:13px; text-transform:none; cursor:pointer;">
+<input type="checkbox" id="rest-diabetes" style="width:auto;"> Diabetes (Controlar Açúcar)
+</label>
+<label style="display:flex; align-items:center; gap:8px; font-size:13px; text-transform:none; cursor:pointer;">
+<input type="checkbox" id="rest-hipertensao" style="width:auto;"> Hipertensão (Low Sodium)
+</label>
+</div>
+</div>
+<div class="input-group">
+<label>Preferência para Refeição Livre (Cheat Meal):</label>
+<input type="text" id="nutri-free-meal" placeholder="Ex: Pizza no sábado à noite, Hambúrguer artesanal...">
+<div class="text-xs text-muted mt-2">💡 O sistema encaixará esta refeição de forma estratégica no seu plano.</div>
+</div>
+<button class="btn btn-primary btn-block" onclick="generateSmartDiet()">✨ Gerar Plano Alimentar</button>
+</div>
+<div id="nutrition-plan-display" style="display:none;">
+<div class="flex-between mb-3">
+<h4> Seu Plano Alimentar Personalizado</h4>
+<button class="btn btn-sm btn-secondary" onclick="resetNutritionForm()">🔄 Refazer</button>
+</div>
+<div id="nutrition-meals-container"></div>
+<div class="card mt-4" style="background:linear-gradient(135deg, rgba(255,107,53,0.1), rgba(255,140,66,0.05)); border-color:var(--accent);">
+<h4 style="color:var(--accent); margin-bottom:8px;">🎉 Refeição Livre</h4>
+<p id="display-free-meal" style="font-size:15px; font-weight:600;"></p>
+<p class="text-xs text-muted mt-2">Aproveite sua refeição preferida sem culpa! O sistema já compensou as calorias nas outras refeições.</p>
+</div>
+</div>
+</div>
+<!-- LIBRARY -->
+<div id="library-screen" class="screen">
+<div class="input-group"><input type="text" id="lib-search" placeholder="🔍 Buscar exercício..." oninput="renderLibrary()"></div>
+<div class="tab-switch">
+<button class="tab-btn active" onclick="filterLib(this,'all')">Todos</button>
+<button class="tab-btn" onclick="filterLib(this,'Peito')">Peito</button>
+<button class="tab-btn" onclick="filterLib(this,'Costas')">Costas</button>
+<button class="tab-btn" onclick="filterLib(this,'Perna')">Perna</button>
+<button class="tab-btn" onclick="filterLib(this,'Ombro')">Ombro</button>
+<button class="tab-btn" onclick="filterLib(this,'Braço')">Braço</button>
+<button class="tab-btn" onclick="filterLib(this,'Core')">Core</button>
+</div>
+<div id="lib-list"></div>
+</div>
+<!-- PROFILE -->
+<div id="profile-screen" class="screen">
+<div class="profile-header">
+<div class="avatar-container"><div class="inner" id="profile-avatar">👤</div><div class="level-badge" id="profile-level">LVL 1</div></div>
+<h2 id="profile-name">Usuário</h2>
+<div class="text-sm text-muted" id="profile-email"></div>
+<div class="mt-3"><span class="chip accent" id="profile-goal">Objetivo</span></div>
+</div>
+<div class="card" style="margin-bottom:14px;">
+<div class="flex-between" style="margin-bottom:8px;">
+<div class="text-sm">Nível <strong id="profile-level-num">1</strong></div>
+<div class="text-sm text-muted"><span id="profile-xp">0</span> / <span id="profile-xp-need">100</span> XP</div>
+</div>
+<div class="progress-bar"><div class="fill" id="profile-xp-bar" style="width:0%"></div></div>
+</div>
+<div class="grid-4">
+<div class="stat-card g1"><div class="icon">️</div><div class="label">Peso</div><div class="value" style="font-size:18px;"><span id="profile-weight">--</span> kg</div></div>
+<div class="stat-card g2"><div class="icon"></div><div class="label">Altura</div><div class="value" style="font-size:18px;"><span id="profile-height">--</span> cm</div></div>
+<div class="stat-card g3"><div class="icon"></div><div class="label">IMC</div><div class="value" style="font-size:18px;" id="profile-bmi">--</div></div>
+<div class="stat-card g4"><div class="icon">🎂</div><div class="label">Idade</div><div class="value" style="font-size:18px;"><span id="profile-age">--</span></div></div>
+</div>
+<div id="imc-detail"></div>
+<div class="section-title"><h3>🏅 Conquistas</h3></div>
+<div id="achievements-list"></div>
+<div class="section-title"><h3>️ Configurações</h3></div>
+<div class="card">
+<button class="btn btn-secondary btn-block" onclick="editProfile()">✏️ Editar perfil</button>
+<button class="btn btn-secondary btn-block mt-3" onclick="toggleTheme()"> Alternar tema</button>
+<button class="btn btn-secondary btn-block mt-3" onclick="exportData()">📥 Exportar dados</button>
+<button class="btn btn-danger btn-block mt-3" onclick="logoutConfirm()">Sair da conta</button>
+</div>
+</div>
+<!-- ALUNOS & PLANOS -->
+<div id="students-screen" class="screen">
+<div class="flex-between mb-3">
+<h3>Gerenciamento de Alunos e Planos</h3>
+<button class="btn btn-primary btn-sm" onclick="openModal('add-student-modal')">+ Novo Aluno</button>
+</div>
+<div class="input-group"><input type="text" id="student-search" placeholder=" Buscar aluno por nome ou email..." oninput="filterStudents(this.value)"></div>
+<div class="card">
+<div class="table-container">
+<table>
+<thead><tr><th>Aluno</th><th>Perfil</th><th>Plano</th><th>Vigência</th><th>Status</th><th>Ações</th></tr></thead>
+<tbody id="students-table-body"></tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- FINANCEIRO -->
+<div id="financial-screen" class="screen">
+<div class="grid-3 mb-3">
+<div class="stat-card g1"><div class="icon">💰</div><div class="label">Receita Prevista</div><div class="value" id="fin-expected">R$ 0,00</div></div>
+<div class="stat-card g2"><div class="icon">⚠️</div><div class="label">Inadimplência</div><div class="value" id="fin-late">R$ 0,00</div></div>
+<div class="stat-card g3"><div class="icon">✅</div><div class="label">Recebido este mês</div><div class="value" id="fin-received">R$ 0,00</div></div>
+</div>
+<div class="card">
+<div class="flex-between mb-3">
+<h3>Cobranças e Transações</h3>
+<button class="btn btn-accent btn-sm" onclick="openModal('add-transaction-modal')">+ Nova Cobrança</button>
+</div>
+<div class="table-container">
+<table>
+<thead><tr><th>Aluno</th><th>Descrição</th><th>Vencimento</th><th>Valor</th><th>Método</th><th>Status</th><th>Ação</th></tr></thead>
+<tbody id="financial-table-body"></tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- GRADE & AULAS -->
+<div id="schedule-screen" class="screen">
+<div class="flex-between mb-3">
+<h3>Grade de Aulas Coletivas</h3>
+<button class="btn btn-primary btn-sm" onclick="openModal('add-class-modal')">+ Nova Aula</button>
+</div>
+<div class="card">
+<div class="schedule-grid" id="schedule-grid-container"></div>
+</div>
+</div>
+<!-- LOGS DE ACESSO -->
+<div id="access-screen" class="screen">
+<div class="flex-between mb-3">
+<h3>Logs de Acesso em Tempo Real</h3>
+<div class="flex" style="gap:8px;">
+<span class="chip primary">● Ao vivo</span>
+<button class="btn btn-secondary btn-sm" onclick="simulateAccessLog()">Simular Acesso</button>
+</div>
+</div>
+<div class="input-group"><input type="text" id="access-search" placeholder=" Filtrar por nome do aluno..." oninput="filterAccessLogs(this.value)"></div>
+<div class="card">
+<div class="table-container">
+<table>
+<thead><tr><th>Data/Hora</th><th>Aluno</th><th>Método</th><th>Local</th><th>Status</th></tr></thead>
+<tbody id="access-log-body"></tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- AVALIAÇÕES FÍSICAS -->
+<div id="assessments-screen" class="screen">
+<div class="flex-between mb-3">
+<h3>Avaliações Físicas Completas</h3>
+<button class="btn btn-primary btn-sm" onclick="openAssessmentModal()">+ Nova Avaliação</button>
+</div>
+<div class="grid-2">
+<div class="card">
+<h4 class="mb-3">Histórico de Alunos</h4>
+<div class="input-group"><input type="text" placeholder="Buscar aluno..." oninput="filterAssessments(this.value)"></div>
+<div id="assessment-student-list" style="max-height: 400px; overflow-y: auto;"></div>
+</div>
+<div class="card">
+<h4 class="mb-3">Detalhes da Avaliação</h4>
+<div id="assessment-details">
+<div class="empty"><div class="ic">📋</div><div>Selecione um aluno para ver os detalhes</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- TIMER -->
+<div class="timer-overlay" id="timer-overlay">
+<div class="timer-box">
+<div id="timer-exercise-name" class="text-sm text-muted">Próximo exercício</div>
+<div class="timer-circle" id="timer-circle" style="margin-top:16px;"><div class="inner"><div class="timer-display" id="timer-display">00:00</div><div class="text-xs text-muted">descanso</div></div></div>
+<div class="row"><button class="btn btn-secondary" onclick="closeTimer()">Fechar</button><button class="btn btn-primary" id="timer-pause-btn" onclick="toggleTimerPause()">⏸️ Pausar</button></div>
+<button class="btn btn-accent btn-block mt-3" onclick="skipTimer()">⏭️ Pular descanso</button>
+</div>
+</div>
+<!-- MODAL GENÉRICO -->
+<div class="modal-overlay" id="generic-modal">
+<div class="modal-content" id="generic-modal-content"></div>
+</div>
+<!-- DIALOG -->
+<div class="modal-overlay" id="dialog-overlay">
+<div class="dialog-content" id="dialog-content"></div>
+</div>
+<!-- MODAIS DE GESTÃO -->
+<div class="modal-overlay" id="add-student-modal">
+<div class="modal-content">
+<div class="modal-header"><h2>Novo Aluno / Usuário</h2><button class="close-btn" onclick="closeModal('add-student-modal')">✕</button></div>
+<div class="input-group"><label>Nome Completo</label><input type="text" id="new-student-name"></div>
+<div class="input-group"><label>Email</label><input type="email" id="new-student-email"></div>
+<div class="row">
+<div class="input-group"><label>Perfil</label><select id="new-student-role"><option>Aluno</option><option>Professor</option><option>Recepcionista</option><option>Administrador</option></select></div>
+<div class="input-group"><label>Plano</label><select id="new-student-plan"><option>Plano Mensal</option><option>Plano Anual</option><option>Staff</option></select></div>
+</div>
+<div class="input-group"><label>Vigência do Plano</label><input type="date" id="new-student-validity"></div>
+<div class="input-group" style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+<input type="checkbox" id="lgpd-check" checked style="width:auto;">
+<label for="lgpd-check" style="margin:0; font-size:12px; text-transform:none; letter-spacing:0; color:var(--text-2);">Declaro que o aluno concordou com a Política de Privacidade e tratamento de dados conforme a LGPD.</label>
+</div>
+<button class="btn btn-primary btn-block mt-3" onclick="addNewStudent()">Cadastrar</button>
+</div>
+</div>
+<div class="modal-overlay" id="add-transaction-modal">
+<div class="modal-content">
+<div class="modal-header"><h2>Nova Transação</h2><button class="close-btn" onclick="closeModal('add-transaction-modal')">✕</button></div>
+<div class="input-group"><label>Aluno</label><select id="trans-student"></select></div>
+<div class="input-group"><label>Descrição</label><input type="text" id="trans-desc" value="Mensalidade"></div>
+<div class="row">
+<div class="input-group"><label>Valor (R$)</label><input type="number" id="trans-value" step="0.01" value="89.90"></div>
+<div class="input-group"><label>Vencimento</label><input type="date" id="trans-due"></div>
+</div>
+<div class="input-group"><label>Método</label><select id="trans-method"><option>PIX</option><option>Cartão de Crédito</option><option>Dinheiro</option></select></div>
+<button class="btn btn-primary btn-block" onclick="addTransaction()">Registrar</button>
+</div>
+</div>
+<div class="modal-overlay" id="add-class-modal">
+<div class="modal-content">
+<div class="modal-header"><h2>Agendar Nova Aula</h2><button class="close-btn" onclick="closeModal('add-class-modal')">✕</button></div>
+<div class="row">
+<div class="input-group"><label>Dia da Semana</label><select id="class-day"><option value="1">Segunda</option><option value="2">Terça</option><option value="3">Quarta</option><option value="4">Quinta</option><option value="5">Sexta</option></select></div>
+<div class="input-group"><label>Horário</label><select id="class-time"><option value="07:00">07:00</option><option value="09:00">09:00</option><option value="18:00">18:00</option><option value="19:00">19:00</option><option value="20:00">20:00</option></select></div>
+</div>
+<div class="input-group"><label>Nome da Aula</label><input type="text" id="class-name" placeholder="Ex: CrossFit, Yoga, Spinning"></div>
+<div class="row">
+<div class="input-group"><label>Instrutor</label><input type="text" id="class-instructor" placeholder="Ex: Prof. Ricardo"></div>
+<div class="input-group"><label>Vagas</label><input type="number" id="class-capacity" value="15"></div>
+</div>
+<button class="btn btn-primary btn-block" onclick="addClass()">Agendar</button>
+</div>
+</div>
+<div class="modal-overlay" id="add-assessment-modal">
+<div class="modal-content" style="max-width: 600px;">
+<div class="modal-header"><h2>Nova Avaliação Física</h2><button class="close-btn" onclick="closeModal('add-assessment-modal')">✕</button></div>
+<div class="row">
+<div class="input-group">
+<label>Aluno</label>
+<input type="text" id="assess-student" list="student-datalist" placeholder="Digite o nome ou selecione..." autocomplete="off">
+<datalist id="student-datalist"></datalist>
+</div>
+<div class="input-group"><label>Data</label><input type="date" id="assess-date"></div>
+</div>
+<div class="row">
+<div class="input-group"><label>Peso (kg)</label><input type="number" id="assess-weight" step="0.1" oninput="calcAssessIMC()"></div>
+<div class="input-group"><label>Altura (cm)</label><input type="number" id="assess-height" oninput="calcAssessIMC()"></div>
+<div class="input-group"><label>IMC (Auto)</label><input type="text" id="assess-imc" readonly style="background:var(--card-2); font-weight:700; color:var(--primary);"></div>
+</div>
+<div class="row">
+<div class="input-group"><label>Gordura Corporal (%)</label><input type="number" id="assess-fat" step="0.1"></div>
+<div class="input-group"><label>Massa Magra (kg)</label><input type="number" id="assess-muscle" step="0.1"></div>
+</div>
+<div class="row">
+<div class="input-group"><label>Cintura (cm)</label><input type="number" id="assess-waist" step="0.1"></div>
+<div class="input-group"><label>Quadril (cm)</label><input type="number" id="assess-hip" step="0.1"></div>
+</div>
+<div class="input-group"><label>Objetivo Principal</label>
+<select id="assess-goal">
+<option value="hipertrofia">Hipertrofia (Ganho de Massa)</option>
+<option value="emagrecimento">Emagrecimento (Perda de Gordura)</option>
+<option value="resistencia">Resistência e Condicionamento</option>
+</select>
+</div>
+<div class="input-group"><label>Anamnese / Observações</label><textarea id="assess-notes" rows="3" placeholder="Lesões, restrições, histórico médico..."></textarea></div>
+<div style="background:rgba(0,230,118,0.1); border:1px solid var(--primary); border-radius:12px; padding:16px; margin-top:16px;">
+<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+<input type="checkbox" id="generate-workout-check" checked style="width:auto; accent-color:var(--primary);">
+<label for="generate-workout-check" style="margin:0; font-weight:600; color:var(--primary);">✅ Gerar treino automático de Seg a Sex baseado nesta avaliação</label>
+</div>
+<p class="text-xs text-muted">O sistema criará uma periodização completa (Segunda a Sexta) adaptada ao objetivo e salvará diretamente na aba "Meus Treinos".</p>
+</div>
+<button class="btn btn-primary btn-block mt-3" onclick="saveAssessment()">Salvar Avaliação e Gerar Treino</button>
+</div>
+</div>
+<!-- BOTTOM NAV (MOBILE) -->
+<nav class="bottom-nav" id="bottom-nav" style="display:none;">
+<div class="nav-item active" data-screen="home" onclick="navigate('home')"><div class="ic">🏠</div><div class="lb">Home</div></div>
+<div class="nav-item" data-screen="workouts" onclick="navigate('workouts')"><div class="ic">💪</div><div class="lb">Treinos</div></div>
+<div class="nav-item" data-screen="students" onclick="navigate('students')"><div class="ic">🏢</div><div class="lb">Gestão</div></div>
+<div class="nav-item" data-screen="schedule" onclick="navigate('schedule')"><div class="ic"></div><div class="lb">Grade</div></div>
+<div class="nav-item" data-screen="profile" onclick="navigate('profile')"><div class="ic">👤</div><div class="lb">Perfil</div></div>
+<div class="nav-item" data-screen="nutrition" onclick="navigate('nutrition')"><div class="ic">🥗</div><div class="lb">Nutrição</div></div>
+</nav>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
